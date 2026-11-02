@@ -1125,16 +1125,16 @@ def aporte_final():
     )
     p("Las dependencias son pocas: Flask y lo que trae consigo. Three.js se descarga "
       "desde internet, así que no tuve que instalar Node.js ni compilar nada. Eso fue "
-      "un alivio porque mi laptop no es muy potente.")
+      "un alivio porque no quería sumar más cosas al proyecto.")
 
     h2("4.2 Git y GitHub")
     figura(
         "04_git_terminal.png",
         "La terminal con los comandos de Git, los commits y el push al repositorio.",
     )
-    p("Nunca había usado Git de verdad, solo lo había visto de nombre. Al principio "
-      "me confundía con el orden de los comandos, pero cuando entendí que cada commit "
-      "es como guardar una foto del proyecto, todo tuvo sentido. Aquí se ve el "
+    p("No había usado Git más allá de lo básico, así que al principio me "
+      "confundía con el orden de los comandos. Cuando entendí que cada commit "
+      "es como guardar una foto del proyecto, todo tuvo más sentido. Aquí se ve el "
       "historial: primero subí la versión con gotas, cámara y explosiones, y después "
       "un cambio pequeño para las cookies de sesión.")
 
