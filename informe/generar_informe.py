@@ -980,7 +980,7 @@ def despliegue():
     codigo("""
 cd ~/Imágenes
 zip -qr papa-caliente-3d.zip papa-caliente-3d \\
-    -x '*/__pycache__/*' '*.pyc' '.venv/*'
+    -x '*/__pycache__/*' '*.pyc' 'papa-caliente-3d/.venv/*' 'papa-caliente-3d/informe/*'
 """, "Empaquetado local (Linux/macOS). En Windows se puede usar el Explorador: clic derecho → Enviar a → Carpeta comprimida.")
 
     h2("3.3 Subirlo y descomprimirlo")
@@ -1342,7 +1342,7 @@ papa-caliente-3d/
 # 1. En local: crear el ZIP sin archivos temporales
 cd ~/Imágenes
 zip -qr papa-caliente-3d.zip papa-caliente-3d \\
-    -x '*/__pycache__/*' '*.pyc' '.venv/*'
+    -x '*/__pycache__/*' '*.pyc' 'papa-caliente-3d/.venv/*' 'papa-caliente-3d/informe/*'
 
 # 2. En PythonAnywhere: Files → subir el ZIP y luego Bash
 cd ~
