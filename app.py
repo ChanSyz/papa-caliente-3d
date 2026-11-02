@@ -16,6 +16,11 @@ from juego import (
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "papa-caliente-3d-demo")
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_NAME="papa3d_session",
+)
 
 
 def _nombres_validos(datos):
