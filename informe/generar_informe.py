@@ -542,7 +542,7 @@ def introduccion():
       "y me pareció una forma entretenida de mostrar la lista circular sin que se "
       "sintiera como un ejercicio sacado de un libro.")
 
-    p("El juego funciona así: escribo el nombre de entre dos y diez jugadores, cada "
+    p("El juego funciona así: escribo el nombre de dos a diez jugadores, cada "
       "uno aparece alrededor de una fogata y uno de ellos tiene la papa. Esa persona "
       "elige a quién pasársela y la mecha baja un punto. Si la mecha llega a cero, "
       "el que recibe la papa queda eliminado y sale del círculo. Gana el último que "
@@ -588,7 +588,7 @@ def memoria():
     h1("2. Memoria técnica")
 
     h2("2.1 De qué trata el juego")
-    p("Papa Caliente es un juego de eliminación por turnos para entre dos y diez "
+    p("Papa Caliente es un juego de eliminación por turnos para dos a diez "
       "jugadores. Cada uno se coloca alrededor de una fogata y uno empieza con la "
       "papa. Esa persona elige a quién pasársela antes de que la mecha se apague. "
       "Cada pase gasta un punto de mecha y, cuando llega a cero, el que recibe la "
