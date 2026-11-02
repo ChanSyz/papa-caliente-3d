@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <title>Papa Caliente 3D · Lista Circular</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='5') }}">
+</head>
+<body>
+  <canvas id="scene" aria-label="Escena 3D del juego"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="flash" aria-hidden="true"></div>
+
+  <header class="hud">
+    <span class="brand-dot"></span>
+    <div>
+      <h1>Papa Caliente <em>3D</em></h1>
+      <p>Lista circular</p>
+    </div>
+  </header>
+
+  <aside class="panel" aria-label="Controles del juego">
+    <div class="setup">
+      <label class="control" for="numJugadores">
+        <span>Jugadores</span>
+        <output id="numVal">6</output>
+      </label>
+      <input id="numJugadores" type="range" min="2" max="10" value="6" step="1">
+      <button id="btnNueva" type="button">Empezar partida</button>
+    </div>
+
+    <div id="infoJuego" hidden>
+      <div class="mecha-card" id="mechaCard">
+        <span class="mini">Mecha</span>
+        <output id="mechaNum" class="mecha-num">0</output>
+        <span class="mini">pases para explotar</span>
+      </div>
+
+      <div class="agua-card" id="aguaCard">
+        <div class="agua-cabecera">
+          <span class="mini">Gotas de agua</span>
+          <output id="gotasNum" class="agua-num">0</output>
+        </div>
+        <span class="agua-detalle">Haz clic en una gota 💧 para sumar 1 pase a la mecha.</span>
+      </div>
+
+      <div class="turno">
+        <span class="mini">Tiene la papa</span>
+        <strong id="actualNombre" class="actual">—</strong>
+      </div>
+
+      <div class="destinos-wrap">
+        <span class="mini">¿A quién se la pasas?</span>
+        <div id="destinos" class="destinos"></div>
+      </div>
+
+      <div class="lista-box">
+        <span class="mini">Lista circular</span>
+        <div id="circulo" class="circulo">—</div>
+      </div>
+
+      <div id="resultado" class="resultado" role="status" hidden></div>
+    </div>
+
+    <div id="estado" class="estado" role="status" aria-live="polite">
+      Elige cuántos jugadores y pulsa Empezar partida.
+    </div>
+
+    <p class="ayuda">
+      Haz clic en un jugador del círculo o usa un botón. Cada pase gasta
+      un número de la mecha; al llegar a cero, quien recibe la papa sale.
+      Recoge gotas de agua para enfriarla y ganar tiempo.
+    </p>
+
+    <div class="camara-hint" aria-hidden="true">
+      <span><kbd>Arrastra</kbd> girar cámara</span>
+      <span><kbd>Rueda</kbd> acercar</span>
+      <span><kbd>← →</kbd> rotar</span>
+      <span><kbd>↑ ↓</kbd> zoom</span>
+    </div>
+  </aside>
+
+  <p class="pista">El último jugador que queda en la lista gana.</p>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="{{ url_for('static', filename='main.js', v='7') }}"></script>
+</body>
+</html>
