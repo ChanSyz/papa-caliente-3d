@@ -1,7 +1,5 @@
 """Lista circular enlazada usada por el juego.
-
-La clase ListaCircular quedó exactamente como la entregó el profesor,
-incluido ``def init``. Como Python no llama automáticamente a ``init``,
+Como Python no llama automáticamente a ``init``,
 el juego crea la lista con ``nueva_lista()`` (en juego.py), que ejecuta
 ``init()`` una vez. La clase Nodo se agregó aparte porque la lista la usa.
 """
