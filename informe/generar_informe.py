@@ -58,26 +58,26 @@ def configurar_documento():
     seccion = doc.sections[0]
     seccion.page_width = Cm(21)
     seccion.page_height = Cm(29.7)
-    seccion.left_margin = Cm(2.4)
-    seccion.right_margin = Cm(2.4)
-    seccion.top_margin = Cm(2.3)
-    seccion.bottom_margin = Cm(2.1)
-    seccion.header_distance = Cm(1.1)
-    seccion.footer_distance = Cm(1.0)
-    seccion.different_first_page_header_footer = True
+    seccion.left_margin = Cm(2.54)
+    seccion.right_margin = Cm(2.54)
+    seccion.top_margin = Cm(2.54)
+    seccion.bottom_margin = Cm(2.54)
+    seccion.header_distance = Cm(1.25)
+    seccion.footer_distance = Cm(1.25)
+    seccion.different_first_page_header_footer = False
 
     normal = doc.styles["Normal"]
-    normal.font.name = "Liberation Sans"
-    normal.font.size = Pt(10.2)
-    normal.font.color.rgb = RGBColor(0x1F, 0x27, 0x33)
-    normal.paragraph_format.space_after = Pt(4)
-    normal.paragraph_format.line_spacing = 1.16
+    normal.font.name = "Times New Roman"
+    normal.font.size = Pt(12)
+    normal.font.color.rgb = RGBColor(0, 0, 0)
+    normal.paragraph_format.space_after = Pt(0)
+    normal.paragraph_format.line_spacing = 2.0
     rpr = normal.element.get_or_add_rPr()
     rfonts = rpr.find(qn("w:rFonts"))
     if rfonts is None:
         rfonts = OxmlElement("w:rFonts")
         rpr.append(rfonts)
-    rfonts.set(qn("w:eastAsia"), "Liberation Sans")
+    rfonts.set(qn("w:eastAsia"), "Times New Roman")
 
 
 def sombrear_celda(celda, color):
@@ -136,123 +136,117 @@ def encabezado_y_pie():
     header = seccion.header
     hp = header.paragraphs[0]
     hp.text = ""
-    hp.paragraph_format.tab_stops.add_tab_stop(Cm(16.2), WD_TAB_ALIGNMENT.RIGHT)
-    r = hp.add_run("Papa Caliente 3D")
-    r.bold = True
-    r.font.size = Pt(8.5)
-    r.font.color.rgb = NAVY
-    r = hp.add_run("\tInforme de actividad · Estructura de Datos")
-    r.font.size = Pt(8.5)
-    r.font.color.rgb = GRAY
-    borde_inferior(hp, ORANGE_HEX, 6)
-
-    footer = seccion.footer
-    fp = footer.paragraphs[0]
-    fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = fp.add_run("Página ")
-    r.font.size = Pt(8)
-    r.font.color.rgb = GRAY
-    r = fp.add_run()
-    r.font.size = Pt(8)
-    r.font.color.rgb = GRAY
-    campo(fp, "PAGE")
-    r = fp.add_run(" de ")
-    r.font.size = Pt(8)
-    r.font.color.rgb = GRAY
-    campo(fp, "NUMPAGES")
-    r = fp.add_run("  ·  " + PARAMS["nombre"] + " " + PARAMS["apellido"])
-    r.font.size = Pt(8)
-    r.font.color.rgb = GRAY
+    hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    r = hp.add_run()
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(11)
+    campo(hp, "PAGE")
 
 
 def h1(texto, salto=True):
     par = doc.add_paragraph()
     par.paragraph_format.page_break_before = bool(salto)
     par.paragraph_format.space_before = Pt(0)
-    par.paragraph_format.space_after = Pt(10)
+    par.paragraph_format.space_after = Pt(0)
+    par.paragraph_format.line_spacing = 2.0
     par.paragraph_format.keep_with_next = True
+    par.alignment = WD_ALIGN_PARAGRAPH.CENTER
     run = par.add_run(texto)
     run.bold = True
-    run.font.size = Pt(19)
-    run.font.color.rgb = NAVY
-    borde_inferior(par, ORANGE_HEX, 12)
+    run.font.name = "Times New Roman"
+    run.font.size = Pt(12)
+    run.font.color.rgb = RGBColor(0, 0, 0)
     return par
 
 
 def h2(texto):
     par = doc.add_paragraph()
-    par.paragraph_format.space_before = Pt(13)
-    par.paragraph_format.space_after = Pt(5)
+    par.paragraph_format.space_before = Pt(0)
+    par.paragraph_format.space_after = Pt(0)
+    par.paragraph_format.line_spacing = 2.0
     par.paragraph_format.keep_with_next = True
+    par.alignment = WD_ALIGN_PARAGRAPH.LEFT
     run = par.add_run(texto)
     run.bold = True
-    run.font.size = Pt(13.5)
-    run.font.color.rgb = NAVY
+    run.font.name = "Times New Roman"
+    run.font.size = Pt(12)
+    run.font.color.rgb = RGBColor(0, 0, 0)
     return par
 
 
 def h3(texto):
     par = doc.add_paragraph()
-    par.paragraph_format.space_before = Pt(9)
-    par.paragraph_format.space_after = Pt(3)
+    par.paragraph_format.space_before = Pt(0)
+    par.paragraph_format.space_after = Pt(0)
+    par.paragraph_format.line_spacing = 2.0
     par.paragraph_format.keep_with_next = True
+    par.alignment = WD_ALIGN_PARAGRAPH.LEFT
     run = par.add_run(texto)
     run.bold = True
-    run.font.size = Pt(11.2)
-    run.font.color.rgb = ORANGE
+    run.italic = True
+    run.font.name = "Times New Roman"
+    run.font.size = Pt(12)
+    run.font.color.rgb = RGBColor(0, 0, 0)
     return par
 
 
-def p(texto, negrita=None, cursiva=False, tamano=10.2, justificar=True,
-      espacio=4, color=None):
+def p(texto, negrita=None, cursiva=False, tamano=12, justificar=False,
+      espacio=0, color=None):
     par = doc.add_paragraph()
     par.paragraph_format.space_after = Pt(espacio)
-    if justificar:
-        par.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    par.paragraph_format.line_spacing = 2.0
+    par.paragraph_format.first_line_indent = Cm(1.27)
+    par.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY if justificar else WD_ALIGN_PARAGRAPH.LEFT
     if negrita:
         r = par.add_run(negrita)
         r.bold = True
-        r.font.color.rgb = NAVY
+        r.font.name = "Times New Roman"
         r.font.size = Pt(tamano)
     r = par.add_run(texto)
     r.italic = cursiva
+    r.font.name = "Times New Roman"
     r.font.size = Pt(tamano)
     if color:
         r.font.color.rgb = color
     return par
 
 
-def bullets(items, tamano=10.3):
+def bullets(items, tamano=12):
     for item in items:
         par = doc.add_paragraph(style="List Bullet")
-        par.paragraph_format.space_after = Pt(2)
-        par.paragraph_format.left_indent = Cm(0.75)
-        par.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        par.paragraph_format.space_after = Pt(0)
+        par.paragraph_format.line_spacing = 2.0
+        par.paragraph_format.left_indent = Cm(1.27)
+        par.alignment = WD_ALIGN_PARAGRAPH.LEFT
         if isinstance(item, tuple):
             lead, resto = item
             r = par.add_run(lead)
             r.bold = True
-            r.font.color.rgb = NAVY
+            r.font.name = "Times New Roman"
             r.font.size = Pt(tamano)
             r = par.add_run(resto)
+            r.font.name = "Times New Roman"
             r.font.size = Pt(tamano)
         else:
             r = par.add_run(item)
+            r.font.name = "Times New Roman"
             r.font.size = Pt(tamano)
 
 
-def numeros(items, tamano=10.3):
+def numeros(items, tamano=12):
     for indice, item in enumerate(items, start=1):
         par = doc.add_paragraph()
-        par.paragraph_format.space_after = Pt(2)
-        par.paragraph_format.left_indent = Cm(0.75)
-        par.paragraph_format.first_line_indent = Cm(-0.5)
-        par.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        par.paragraph_format.space_after = Pt(0)
+        par.paragraph_format.line_spacing = 2.0
+        par.paragraph_format.left_indent = Cm(1.27)
+        par.paragraph_format.first_line_indent = Cm(-0.6)
+        par.alignment = WD_ALIGN_PARAGRAPH.LEFT
         r = par.add_run(f"{indice}. ")
         r.bold = True
+        r.font.name = "Times New Roman"
         r.font.size = Pt(tamano)
-        r.font.color.rgb = NAVY
         r = par.add_run(item)
+        r.font.name = "Times New Roman"
         r.font.size = Pt(tamano)
 
 
@@ -295,11 +289,26 @@ def codigo(texto, titulo=None):
     espacio.paragraph_format.space_after = Pt(2)
 
 
-def tabla(headers, filas, anchos=None, tamano=9.0):
+def tabla(headers, filas, anchos=None, tamano=10.0):
     t = doc.add_table(rows=1, cols=len(headers))
     t.style = "Table Grid"
     t.alignment = WD_TABLE_ALIGNMENT.CENTER
     t.autofit = False
+
+    tbl_pr = t._tbl.tblPr
+    borders = OxmlElement("w:tblBorders")
+    for lado, grosor in (("top", 8), ("bottom", 8), ("insideH", 4)):
+        borde = OxmlElement(f"w:{lado}")
+        borde.set(qn("w:val"), "single")
+        borde.set(qn("w:sz"), str(grosor))
+        borde.set(qn("w:space"), "0")
+        borde.set(qn("w:color"), "000000")
+        borders.append(borde)
+    for lado in ("left", "right", "insideV"):
+        borde = OxmlElement(f"w:{lado}")
+        borde.set(qn("w:val"), "nil")
+        borders.append(borde)
+    tbl_pr.append(borders)
 
     tr_pr = t.rows[0]._tr.get_or_add_trPr()
     tr_pr.append(OxmlElement("w:tblHeader"))
@@ -308,14 +317,15 @@ def tabla(headers, filas, anchos=None, tamano=9.0):
         celda = t.rows[0].cells[indice]
         celda.text = ""
         celda.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
-        sombrear_celda(celda, NAVY_HEX)
         par = celda.paragraphs[0]
         par.paragraph_format.space_before = Pt(2)
         par.paragraph_format.space_after = Pt(2)
+        par.paragraph_format.line_spacing = 1.0
         run = par.add_run(texto)
         run.bold = True
+        run.font.name = "Times New Roman"
         run.font.size = Pt(tamano)
-        run.font.color.rgb = WHITE
+        run.font.color.rgb = RGBColor(0, 0, 0)
 
     for numero_fila, fila in enumerate(filas):
         fila_obj = t.add_row()
@@ -325,12 +335,12 @@ def tabla(headers, filas, anchos=None, tamano=9.0):
             celda = celdas[indice]
             celda.text = ""
             celda.vertical_alignment = WD_ALIGN_VERTICAL.TOP
-            if numero_fila % 2 == 1:
-                sombrear_celda(celda, "FAFBFC")
             par = celda.paragraphs[0]
             par.paragraph_format.space_before = Pt(2)
             par.paragraph_format.space_after = Pt(2)
+            par.paragraph_format.line_spacing = 1.0
             run = par.add_run(str(valor))
+            run.font.name = "Times New Roman"
             run.font.size = Pt(tamano)
 
     if anchos:
@@ -343,25 +353,19 @@ def tabla(headers, filas, anchos=None, tamano=9.0):
 
 
 def aviso(titulo, texto, color_fondo="FFF4E8", color_borde=ORANGE_HEX):
-    tabla_aviso = doc.add_table(rows=1, cols=1)
-    tabla_aviso.alignment = WD_TABLE_ALIGNMENT.CENTER
-    tabla_aviso.autofit = False
-    celda = tabla_aviso.cell(0, 0)
-    celda.width = Cm(16.2)
-    sombrear_celda(celda, color_fondo)
-    borde_celda(celda, color_borde, 6)
-    par = celda.paragraphs[0]
-    par.paragraph_format.space_before = Pt(4)
-    par.paragraph_format.space_after = Pt(4)
+    par = doc.add_paragraph()
+    par.paragraph_format.left_indent = Cm(1.27)
+    par.paragraph_format.space_before = Pt(6)
+    par.paragraph_format.space_after = Pt(6)
+    par.paragraph_format.line_spacing = 2.0
+    par.alignment = WD_ALIGN_PARAGRAPH.LEFT
     r = par.add_run(titulo + " ")
     r.bold = True
-    r.font.size = Pt(9)
-    r.font.color.rgb = ORANGE if color_borde == ORANGE_HEX else NAVY
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(12)
     r = par.add_run(texto)
-    r.font.size = Pt(9)
-    r.font.color.rgb = RGBColor(0x33, 0x3D, 0x4A)
-    espacio = doc.add_paragraph()
-    espacio.paragraph_format.space_after = Pt(2)
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(12)
 
 
 def pendiente(nombre_archivo):
@@ -391,12 +395,23 @@ def pendiente(nombre_archivo):
 def figura(nombre_archivo, comentario, ancho=13.2):
     FIG["n"] += 1
     ruta = CAPTURAS / nombre_archivo
+
+    num = doc.add_paragraph()
+    num.paragraph_format.space_before = Pt(12)
+    num.paragraph_format.space_after = Pt(2)
+    num.paragraph_format.keep_with_next = True
+    r = num.add_run(f"Figura {FIG['n']}")
+    r.bold = True
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(12)
+    r.font.color.rgb = RGBColor(0, 0, 0)
+
     if ruta.exists():
         try:
             doc.add_picture(str(ruta), width=Cm(ancho))
             doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
             doc.paragraphs[-1].paragraph_format.space_before = Pt(4)
-            doc.paragraphs[-1].paragraph_format.space_after = Pt(2)
+            doc.paragraphs[-1].paragraph_format.space_after = Pt(4)
             doc.paragraphs[-1].paragraph_format.keep_with_next = True
         except Exception:
             pendiente(nombre_archivo)
@@ -404,16 +419,16 @@ def figura(nombre_archivo, comentario, ancho=13.2):
         pendiente(nombre_archivo)
 
     cap = doc.add_paragraph()
-    cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    cap.paragraph_format.space_after = Pt(9)
-    r = cap.add_run(f"Figura {FIG['n']}. ")
-    r.bold = True
-    r.font.size = Pt(8.4)
-    r.font.color.rgb = ORANGE
-    r = cap.add_run(comentario)
+    cap.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    cap.paragraph_format.space_after = Pt(12)
+    cap.paragraph_format.line_spacing = 1.0
+    r = cap.add_run("Nota. ")
     r.italic = True
-    r.font.size = Pt(8.4)
-    r.font.color.rgb = GRAY
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(9)
+    r = cap.add_run(comentario)
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(9)
 
 
 # ----------------------------------------------------------------------
@@ -421,74 +436,72 @@ def figura(nombre_archivo, comentario, ancho=13.2):
 # ----------------------------------------------------------------------
 
 def portada():
-    for _ in range(3):
-        doc.add_paragraph()
+    ruta_logo = CAPTURAS / "logo_uac.png"
+    if ruta_logo.exists():
+        doc.add_picture(str(ruta_logo), width=Cm(3.4))
+        doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        doc.paragraphs[-1].paragraph_format.space_after = Pt(4)
+
+    encabezados = [
+        ("UNIVERSIDAD ANDINA DEL CUSCO", 14, True),
+        ("FILIAL QUILLABAMBA", 12, True),
+        ("FACULTAD DE INGENIERÍA Y ARQUITECTURA", 10.5, False),
+        ("Escuela Profesional de Ingeniería de Sistemas", 10.5, False),
+    ]
+    for texto, tam, negrita in encabezados:
+        par = doc.add_paragraph()
+        par.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        par.paragraph_format.space_after = Pt(0)
+        par.paragraph_format.line_spacing = 1.15
+        r = par.add_run(texto)
+        r.bold = negrita
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(tam)
+        r.font.color.rgb = RGBColor(0, 0, 0)
+
+    for _ in range(2):
+        par = doc.add_paragraph()
+        par.paragraph_format.line_spacing = 1.0
 
     par = doc.add_paragraph()
     par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = par.add_run("INFORME DE ACTIVIDAD CALIFICADA")
+    par.paragraph_format.line_spacing = 2.0
+    r = par.add_run("Papa Caliente 3D: videojuego con lista circular en Python desplegado en la web")
     r.bold = True
-    r.font.size = Pt(9.5)
-    r.font.color.rgb = ORANGE
-    par.paragraph_format.space_after = Pt(10)
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(12)
+    r.font.color.rgb = RGBColor(0, 0, 0)
 
-    par = doc.add_paragraph()
-    par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = par.add_run("Papa Caliente 3D")
-    r.bold = True
-    r.font.size = Pt(34)
-    r.font.color.rgb = NAVY
-    par.paragraph_format.space_after = Pt(2)
-
-    par = doc.add_paragraph()
-    par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = par.add_run("Un juego 3D con Python, Three.js y una lista circular")
-    r.font.size = Pt(13)
-    r.font.color.rgb = GRAY
-    par.paragraph_format.space_after = Pt(18)
-
-    linea = doc.add_paragraph()
-    linea.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    borde_inferior(linea, ORANGE_HEX, 12)
-    linea.paragraph_format.space_after = Pt(20)
+    for _ in range(2):
+        par = doc.add_paragraph()
+        par.paragraph_format.line_spacing = 1.0
 
     datos = [
-        ("Asignatura", "Estructura de Datos"),
-        ("Docente", "Giomar"),
-        ("Autor", f"{PARAMS['nombre']} {PARAMS['apellido']}"),
-        ("Fecha", FECHA),
-        ("URL pública", PARAMS["url"]),
-        ("Repositorio", REPO.format(github=PARAMS["github"])),
+        "Samir Lenin Quispe Huallpa",
+        "Universidad Andina del Cusco, Filial Quillabamba",
+        "Estructura de Datos",
+        "Docente: Giomar",
+        FECHA,
     ]
-    t = doc.add_table(rows=0, cols=2)
-    t.alignment = WD_TABLE_ALIGNMENT.CENTER
-    t.autofit = False
-    for etiqueta, valor in datos:
-        celdas = t.add_row().cells
-        celdas[0].width = Cm(4.0)
-        celdas[1].width = Cm(11.6)
-        par = celdas[0].paragraphs[0]
-        par.paragraph_format.space_after = Pt(3)
-        r = par.add_run(etiqueta)
-        r.bold = True
-        r.font.size = Pt(9.5)
-        r.font.color.rgb = NAVY
-        par = celdas[1].paragraphs[0]
-        par.paragraph_format.space_after = Pt(3)
+    for valor in datos:
+        par = doc.add_paragraph()
+        par.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        par.paragraph_format.line_spacing = 2.0
         r = par.add_run(valor)
-        r.font.size = Pt(9.5)
-        if etiqueta in ("URL pública", "Repositorio"):
-            r.font.color.rgb = BLUE_HEX if False else ORANGE
-            r.bold = True
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(12)
+        r.font.color.rgb = RGBColor(0, 0, 0)
 
-    for _ in range(4):
-        doc.add_paragraph()
+    for _ in range(2):
+        par = doc.add_paragraph()
+        par.paragraph_format.line_spacing = 1.0
 
     par = doc.add_paragraph()
     par.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    r = par.add_run("Trabajo de Estructura de Datos · Flask + Three.js · Publicado en PythonAnywhere")
-    r.font.size = Pt(8.5)
-    r.font.color.rgb = LIGHT_GRAY
+    par.paragraph_format.line_spacing = 1.0
+    r = par.add_run(PARAMS["url"])
+    r.font.name = "Times New Roman"
+    r.font.size = Pt(10)
 
     doc.add_page_break()
 
@@ -846,10 +859,11 @@ def pasar_papa(lista, actual, mecha, destino):
       "la pantalla.")
 
     h2("2.6 Dependencias y cómo se ejecuta")
-    p("El backend necesita Flask y, por si se publica en Render, gunicorn. Three.js "
-      "se carga desde internet con un importmap, así que no hay que instalar Node.js "
-      "ni compilar nada. La primera vez que abre la página necesita conexión para "
-      "descargar Three.js, y el navegador tiene que tener WebGL activo.")
+    p("El backend necesita Flask (Pallets Projects, 2024) y, por si se publica en "
+      "Render, gunicorn. Three.js se carga desde internet con un importmap "
+      "(Three.js, 2024), así que no hay que instalar Node.js ni compilar nada. La "
+      "primera vez que abre la página necesita conexión para descargar Three.js, y "
+      "el navegador tiene que tener WebGL activo.")
 
     p("Al comienzo instalé Flask sin entorno virtual y se me mezclaron las versiones "
       "con otros proyectos. Después aprendí a crear un entorno con venv y a instalar "
@@ -871,10 +885,10 @@ http://127.0.0.1:5000
 """, "Ejecución local.")
 
     h2("2.7 Las pruebas")
-    p("Las pruebas las hice con unittest, que ya viene con Python. Cubren la lista "
-      "circular, las reglas del juego, las gotas y la API. Para probar Flask uso su "
-      "cliente de pruebas, así no tengo que levantar el servidor cada vez. Al final "
-      "quedaron catorce y todas pasan.")
+    p("Las pruebas las hice con unittest (Python Software Foundation, 2024), que ya "
+      "viene con Python. Cubren la lista circular, las reglas del juego, las gotas y "
+      "la API. Para probar Flask uso su cliente de pruebas, así no tengo que "
+      "levantar el servidor cada vez. Al final quedaron catorce y todas pasan.")
 
     tabla(
         ["Grupo", "Qué revisa"],
@@ -909,10 +923,10 @@ def despliegue():
 
     h2("3.1 Por qué elegí PythonAnywhere")
     p("Necesitaba un hosting gratis y que no me pidiera tarjeta. Probé a mirar varias "
-      "opciones y al final me quedé con PythonAnywhere porque está pensado para "
-      "Python, tiene consola, editor y una dirección fija. La cuenta gratuita solo "
-      "permite una aplicación web y hay que renovarla cada cierto tiempo, pero para "
-      "un trabajo del curso alcanza.")
+      "opciones y al final me quedé con PythonAnywhere (PythonAnywhere, 2024) porque "
+      "está pensado para Python, tiene consola, editor y una dirección fija. La "
+      "cuenta gratuita solo permite una aplicación web y hay que renovarla cada "
+      "cierto tiempo, pero para un trabajo del curso alcanza.")
 
     tabla(
         ["Plataforma", "Por qué no la elegí"],
@@ -1228,27 +1242,30 @@ def referencias():
       "las abrí varias veces, sobre todo las de Flask y PythonAnywhere.")
 
     referencias_lista = [
-        "Flask. Documentation. https://flask.palletsprojects.com/",
-        "Three.js. Documentation. https://threejs.org/docs/",
-        "Three.js. OrbitControls. https://threejs.org/docs/#examples/en/controls/OrbitControls",
-        "Python Software Foundation. unittest — Unit testing framework. "
+        "Guía de actividad calificada: Desarrollo y despliegue de un videojuego 3D "
+        "en Python [Documento de clase]. (2026). Asignatura Estructura de Datos, "
+        "Universidad Andina del Cusco.",
+        "MDN Web Docs. (2024). Pointer events. https://developer.mozilla.org/es/docs/Web/API/Pointer_events",
+        "Pallets Projects. (2024). Flask documentation (Version 3.0). "
+        "https://flask.palletsprojects.com/",
+        "Python Software Foundation. (2024). unittest — Unit testing framework. "
         "https://docs.python.org/3/library/unittest.html",
-        "MDN Web Docs. Pointer events. https://developer.mozilla.org/es/docs/Web/API/Pointer_events",
-        "PythonAnywhere. Help: Flask. https://help.pythonanywhere.com/pages/Flask/",
-        "PythonAnywhere. Web apps. https://help.pythonanywhere.com/pages/WebApps/",
-        "Guía de actividad calificada: Desarrollo y despliegue de un videojuego 3D en Python. "
-        "Asignatura Estructura de Datos, docente Giomar, 2026.",
+        "PythonAnywhere. (2024). Flask on PythonAnywhere. "
+        "https://help.pythonanywhere.com/pages/Flask/",
+        "PythonAnywhere. (2024). Web apps. https://help.pythonanywhere.com/pages/WebApps/",
+        "Three.js. (2024). Documentation. https://threejs.org/docs/",
+        "Three.js. (2024). OrbitControls. "
+        "https://threejs.org/docs/#examples/en/controls/OrbitControls",
     ]
     for referencia in referencias_lista:
         par = doc.add_paragraph()
-        par.paragraph_format.left_indent = Cm(0.7)
-        par.paragraph_format.first_line_indent = Cm(-0.7)
-        par.paragraph_format.space_after = Pt(5)
-        r = par.add_run("•  ")
-        r.font.color.rgb = ORANGE
-        r.bold = True
+        par.paragraph_format.left_indent = Cm(1.27)
+        par.paragraph_format.first_line_indent = Cm(-1.27)
+        par.paragraph_format.space_after = Pt(0)
+        par.paragraph_format.line_spacing = 2.0
         r = par.add_run(referencia)
-        r.font.size = Pt(9.8)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(12)
 
 
 def anexo():
