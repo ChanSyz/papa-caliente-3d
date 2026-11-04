@@ -68,7 +68,7 @@ def configurar_documento():
 
     normal = doc.styles["Normal"]
     normal.font.name = "Liberation Sans"
-    normal.font.size = Pt(10.5)
+    normal.font.size = Pt(10.2)
     normal.font.color.rgb = RGBColor(0x1F, 0x27, 0x33)
     normal.paragraph_format.space_after = Pt(4)
     normal.paragraph_format.line_spacing = 1.16
@@ -203,7 +203,7 @@ def h3(texto):
     return par
 
 
-def p(texto, negrita=None, cursiva=False, tamano=10.5, justificar=True,
+def p(texto, negrita=None, cursiva=False, tamano=10.2, justificar=True,
       espacio=4, color=None):
     par = doc.add_paragraph()
     par.paragraph_format.space_after = Pt(espacio)
@@ -388,7 +388,7 @@ def pendiente(nombre_archivo):
     espacio.paragraph_format.space_after = Pt(1)
 
 
-def figura(nombre_archivo, comentario, ancho=15.6):
+def figura(nombre_archivo, comentario, ancho=13.2):
     FIG["n"] += 1
     ruta = CAPTURAS / nombre_archivo
     if ruta.exists():
@@ -522,13 +522,6 @@ def contenido():
         r.font.size = Pt(9.5)
         r.font.color.rgb = GRAY
 
-    aviso(
-        "Sobre las capturas:",
-        "todas las figuras del apartado 4 las tomé yo durante el desarrollo y el "
-        "despliegue. Si alguna todavía aparece como pendiente, es porque falta "
-        "guardarla en la carpeta informe/capturas con el nombre que se indica.",
-    )
-
 
 # ----------------------------------------------------------------------
 # 1. Introducción
@@ -565,12 +558,10 @@ def introduccion():
          "a probar cosas hasta que funcionen."),
     ])
 
-    h2("1.2 Qué logré y qué no")
-    p("Al final el juego quedó funcionando en local y publicado. Se puede crear una "
-      "partida, pasar la papa, recoger gotas, provocar explosiones y llegar a un "
-      "ganador. Hice catorce pruebas automáticas y varias pruebas a mano en el "
-      "navegador. Lo que no hice fue un multijugador real en red: la partida vive "
-      "en la sesión del navegador de cada persona.")
+    p("Al final quedó funcionando en local y publicado: puedo crear una partida, "
+      "pasar la papa, recoger gotas, provocar explosiones y llegar a un ganador. "
+      "Lo que no hice fue un multijugador real en red; cada partida vive en la "
+      "sesión del navegador de quien juega.")
 
     aviso(
         "Resultado:",
@@ -585,14 +576,11 @@ def introduccion():
 # ----------------------------------------------------------------------
 
 def memoria():
-    h1("2. Memoria técnica")
+    h1("2. Memoria técnica", salto=False)
 
     h2("2.1 De qué trata el juego")
-    p("Papa Caliente es un juego de eliminación por turnos para dos a diez "
-      "jugadores. Cada uno se coloca alrededor de una fogata y uno empieza con la "
-      "papa. Esa persona elige a quién pasársela antes de que la mecha se apague. "
-      "Cada pase gasta un punto de mecha y, cuando llega a cero, el que recibe la "
-      "papa explota y sale del círculo. Gana el último que queda.")
+    p("Es un juego de eliminación por turnos para dos a diez jugadores, con estas "
+      "reglas:")
 
     tabla(
         ["Elemento", "Cómo funciona"],
@@ -609,11 +597,10 @@ def memoria():
         anchos=[4.0, 12.0],
     )
 
-    p("Las gotas fueron la mecánica que más me costó pensar. Al principio el juego "
-      "era solo elegir a quién pasarle la papa, y se sentía muy automático. Agregar "
-      "el agua hace que uno tenga que decidir: pasarla rápido o gastar un clic en "
-      "recoger una gota. El límite de 12 es a propósito, para que la partida no se "
-      "vuelva eterna y todavía haya que arriesgarse a pasar la papa.")
+    p("Las gotas nacieron porque pasar la papa se volvía repetitivo. Cada ronda hay "
+      "tres alrededor de la fogata y cada una suma un pase de mecha, hasta un máximo "
+      "de 12; así uno tiene que elegir entre pasar rápido o gastar un clic en "
+      "recoger agua. Cuando alguien explota, vuelven a salir tres.")
 
     h2("2.2 Cómo está organizado el proyecto")
     p("Al principio quería meter todo en un solo archivo, pero se volvía imposible "
@@ -852,41 +839,13 @@ def pasar_papa(lista, actual, mecha, destino):
       "movió más de siete, era un arrastre y no pasa nada. Parece un detalle tonto, "
       "pero cambió por completo la forma de jugar.")
 
-    h2("2.6 Las gotas de agua")
-    p("La idea de las gotas salió probando la partida: pasar la papa era divertido "
-      "las primeras veces, pero después se volvía repetitivo. Entonces pensé en algo "
-      "que se pudiera recoger con el mouse y que diera una ventaja pequeña. Así "
-      "llegaron las gotas: cada una suma un punto de mecha, con un máximo de 12.")
-
-    p("Cada partida genera tres gotas alrededor de la fogata. El servidor elige un "
-      "ángulo y un radio para cada una y los guarda en la sesión; el navegador dibuja "
-      "la forma de gota, un halo en el piso y una luz azul. Al hacer clic, main.js "
-      "sabe cuál es y manda su id a /api/recoger.")
-
     p("Del lado de Python se revisa que la gota exista y que la mecha no esté al "
-      "máximo. Si todo está bien, la gota se saca de la lista, la mecha sube uno y "
-      "se devuelve el estado completo. Cuando alguien explota, vuelven a aparecer "
-      "tres gotas para la siguiente ronda.")
+      "máximo. Un error que tuve que corregir: al principio se podía recoger la "
+      "misma gota dos veces con un doble clic rápido, y la mecha subía de más. Lo "
+      "arreglé quitando la gota de la lista en el servidor, no solo ocultándola en "
+      "la pantalla.")
 
-    p("Un error que tuve que corregir: al inicio se podía recoger la misma gota dos "
-      "veces si hacías doble clic rápido, y la mecha subía de más. Lo arreglé "
-      "quitando la gota de la lista en el servidor y validando el máximo ahí mismo, "
-      "no solo en la pantalla.")
-
-    codigo("""
-def recoger_gota(gotas, mecha, gota_id):
-    if not isinstance(gota_id, str) or not gota_id:
-        raise ValueError("La gota indicada no es válida.")
-    if mecha >= MECHA_MAXIMA_AGUA:
-        raise ValueError("La mecha ya está al máximo; no necesita más agua.")
-    for indice, gota in enumerate(gotas):
-        if gota["id"] == gota_id:
-            gotas.pop(indice)
-            return {"mecha": mecha + 1, "gotas": gotas, "gota": gota}
-    raise ValueError("Esa gota ya fue recogida.")
-""", "Validación y efecto de la recolección.")
-
-    h2("2.7 Dependencias y cómo se ejecuta")
+    h2("2.6 Dependencias y cómo se ejecuta")
     p("El backend necesita Flask y, por si se publica en Render, gunicorn. Three.js "
       "se carga desde internet con un importmap, así que no hay que instalar Node.js "
       "ni compilar nada. La primera vez que abre la página necesita conexión para "
@@ -911,16 +870,11 @@ python app.py
 http://127.0.0.1:5000
 """, "Ejecución local.")
 
-    h2("2.8 Las pruebas")
+    h2("2.7 Las pruebas")
     p("Las pruebas las hice con unittest, que ya viene con Python. Cubren la lista "
       "circular, las reglas del juego, las gotas y la API. Para probar Flask uso su "
       "cliente de pruebas, así no tengo que levantar el servidor cada vez. Al final "
-      "quedaron catorce pruebas y todas pasan.")
-
-    p("No voy a decir que salieron a la primera. Las primeras veces fallaban porque "
-      "me olvidaba de llamar a init() o porque esperaba otro orden en la lista. Ver "
-      "el mensaje de error, corregir y volver a correr se volvió casi una costumbre, "
-      "y creo que así entendí mejor lo que estaba haciendo.")
+      "quedaron catorce y todas pasan.")
 
     tabla(
         ["Grupo", "Qué revisa"],
@@ -951,7 +905,7 @@ OK
 # ----------------------------------------------------------------------
 
 def despliegue():
-    h1("3. Documentación del despliegue")
+    h1("3. Documentación del despliegue", salto=False)
 
     h2("3.1 Por qué elegí PythonAnywhere")
     p("Necesitaba un hosting gratis y que no me pidiera tarjeta. Probé a mirar varias "
@@ -971,35 +925,24 @@ def despliegue():
         anchos=[4.0, 12.0],
     )
 
-    h2("3.2 Preparar el paquete")
-    p("Antes de subir nada, comprimí el proyecto sin el entorno virtual ni las "
-      "carpetas __pycache__, porque esos archivos pesan y no sirven en el servidor. "
-      "El ZIP tiene que llevar la carpeta papa-caliente-3d con app.py, juego.py, "
-      "lista_circular.py, requirements.txt, templates, static y tests.")
+    h2("3.2 Subirlo a GitHub")
+    p("En vez de andar subiendo un ZIP cada vez, subí el proyecto a GitHub y desde "
+      "la consola de PythonAnywhere lo bajé con git clone. Así, cuando cambio algo, "
+      "solo hago git push en mi computadora y git pull en el servidor.")
 
     codigo("""
-cd ~/Imágenes
-zip -qr papa-caliente-3d.zip papa-caliente-3d \\
-    -x '*/__pycache__/*' '*.pyc' 'papa-caliente-3d/.venv/*' 'papa-caliente-3d/informe/*'
-""", "Empaquetado local (Linux/macOS). En Windows se puede usar el Explorador: clic derecho → Enviar a → Carpeta comprimida.")
+# En mi computadora
+git remote add origin https://github.com/ChanSyz/papa-caliente-3d.git
+git push -u origin main
 
-    h2("3.3 Subirlo y descomprimirlo")
-    numeros([
-        "Entro a https://www.pythonanywhere.com con mi cuenta SAMIR18.",
-        "Voy a la pestaña Files y subo papa-caliente-3d.zip a /home/SAMIR18.",
-        "Abro una consola Bash desde Consoles → Bash.",
-        "Descomprimo el archivo y reviso que estén todas las carpetas.",
-        "Instalo Flask si la cuenta todavía no lo tiene.",
-    ])
-
-    codigo("""
+# En la consola Bash de PythonAnywhere
 cd ~
-unzip -o papa-caliente-3d.zip
+git clone https://github.com/ChanSyz/papa-caliente-3d.git
 ls papa-caliente-3d
 python3 -m pip install --user Flask==3.0.3
-""", "Comandos de la consola Bash de PythonAnywhere.")
+""", "Clonación del repositorio en el servidor.")
 
-    h2("3.4 Configurar la aplicación web")
+    h2("3.3 Configurar la aplicación web")
     p("En la pestaña Web se configura todo a mano. Si la aplicación ya existe, como "
       "en mi caso, no hay que crearla otra vez: se actualizan los archivos y se "
       "pulsa Reload. Si se empieza de cero, se elige Manual configuration y una "
@@ -1043,15 +986,13 @@ export SECRET_KEY="una-clave-larga-y-propia"
 # En el panel Web también se puede agregar como variable de entorno.
 """, "Configuración recomendada de SECRET_KEY.")
 
-    h2("3.5 Comprobar que quedó bien")
+    h2("3.4 Comprobar que quedó bien")
     numeros([
         "Pulso Reload en la pestaña Web y espero unos segundos.",
         "Abro https://samir18.pythonanywhere.com en una ventana privada.",
-        "Creo una partida con tres jugadores.",
-        "Recojo una gota y reviso que la mecha suba.",
-        "Paso la papa hasta que explote alguien y confirmo que sale del círculo.",
-        "Giro la cámara con el ratón y con las flechas.",
-        "Abro la consola del navegador para ver si hay errores.",
+        "Creo una partida, recojo una gota y reviso que la mecha suba.",
+        "Paso la papa hasta una explosión y confirmo que el jugador sale del círculo.",
+        "Giro la cámara y reviso que la consola del navegador no tenga errores.",
     ])
 
     p("Si veo la versión anterior, recargo con Ctrl + F5, porque a veces el "
@@ -1067,7 +1008,7 @@ export SECRET_KEY="una-clave-larga-y-propia"
         color_borde="1D4E89",
     )
 
-    h2("3.6 Problemas frecuentes y solución")
+    h2("3.5 Problemas que tuve")
     tabla(
         ["Lo que me pasó", "Por qué era", "Cómo lo resolví"],
         [
@@ -1159,11 +1100,11 @@ def aporte_final():
 
     figura(
         "07_hosting_archivos.png",
-        "La consola de PythonAnywhere después de subir y descomprimir el ZIP.",
+        "La consola de PythonAnywhere después de clonar el repositorio.",
     )
-    p("Subí el ZIP desde Files y lo descomprimí con unzip -o. Ese -o hace que "
-      "reemplace los archivos anteriores, así no quedan mezcladas dos versiones. "
-      "Después revisé con ls que estuvieran app.py, templates y static.")
+    p("Ese git clone bajó el proyecto completo desde GitHub. Después corrí las "
+      "pruebas en el servidor y pasaron las catorce, así que la versión publicada "
+      "era la misma que tenía en mi computadora.")
 
     figura(
         "08_hosting_variables.png",
@@ -1221,7 +1162,7 @@ def aporte_final():
 # ----------------------------------------------------------------------
 
 def conclusiones():
-    h1("5. Conclusiones")
+    h1("5. Conclusiones", salto=False)
 
     p("Cuando empecé, la lista circular me parecía un tema de examen: algo que se "
       "entiende en el papel pero que no se ve en ningún lado. Al hacer el juego dejó "
@@ -1282,7 +1223,7 @@ def conclusiones():
 # ----------------------------------------------------------------------
 
 def referencias():
-    h1("6. Referencias")
+    h1("6. Referencias", salto=False)
     p("Estas son las páginas que fui consultando cuando no entendía algo. La mayoría "
       "las abrí varias veces, sobre todo las de Flask y PythonAnywhere.")
 
@@ -1311,7 +1252,7 @@ def referencias():
 
 
 def anexo():
-    h1("Anexo A. Código y comandos que usé")
+    h1("Anexo A. Código y comandos que usé", salto=False)
     p("Dejo aquí la estructura final y los comandos que repetí varias veces. Sirven "
       "por si hay que volver a publicar el juego o revisar dónde está cada cosa.")
 
@@ -1339,28 +1280,14 @@ papa-caliente-3d/
 
     h2("A.2 Cómo actualizar la versión publicada")
     codigo("""
-# 1. En local: crear el ZIP sin archivos temporales
-cd ~/Imágenes
-zip -qr papa-caliente-3d.zip papa-caliente-3d \\
-    -x '*/__pycache__/*' '*.pyc' 'papa-caliente-3d/.venv/*' 'papa-caliente-3d/informe/*'
+# En mi computadora
+git add . && git commit -m "Cambio" && git push
 
-# 2. En PythonAnywhere: Files → subir el ZIP y luego Bash
-cd ~
-unzip -o papa-caliente-3d.zip
+# En la consola de PythonAnywhere
+cd ~/papa-caliente-3d && git pull
 
-# 3. En Web: pulsar Reload y abrir
-https://samir18.pythonanywhere.com/
-""")
-
-    h2("A.3 Lo que reviso antes de entregar")
-    bullets([
-        "Abro la URL en una ventana privada y confirmo que se ve la versión nueva.",
-        "En la captura final aparece el dominio completo.",
-        "Puedo crear una partida, recoger una gota y provocar una explosión.",
-        "La consola del navegador no muestra errores.",
-        "El repositorio de GitHub tiene el código y el README.",
-        "El archivo se llama Videojuego3D_Apellido_Nombre.pdf y no depende de enlaces externos.",
-    ])
+# Luego, en la pestaña Web: Reload
+""", "Actualización sin volver a subir archivos a mano.")
 
 
 # ----------------------------------------------------------------------
