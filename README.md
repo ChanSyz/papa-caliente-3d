@@ -157,3 +157,17 @@ exige que **todo** el juego sea Python (incluido el 3D), este esquema no
 cumple: en ese caso la entrega tendría que ser una aplicación de escritorio
 con Ursina/Panda3D (`.exe`), porque esos motores no exportan de forma fiable
 a la web.
+
+## Modo contra bots
+
+Al empezar, la casilla **Jugar contra bots** (activada por defecto) deja al
+`Jugador 1` como humano y al resto como bots. Los bots deciden solos:
+
+- Con mecha 1 pasan la papa (quien la recibe explota).
+- Con mecha 2 suelen recoger una gota para no dejarle la mecha en 1 al siguiente.
+- En los demás casos pasan al siguiente del círculo (40 %) o a otro jugador al azar.
+
+La decisión vive en `juego.py` (`candidatos_bot`, `elegir_destino_bot`,
+`bot_quiere_agua`) y recorre la lista con `siguiente`; la clase `ListaCircular`
+no se modificó. Endpoint nuevo: `POST /api/bot` juega un movimiento del bot que
+tiene la papa (agua o pase).

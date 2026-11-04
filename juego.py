@@ -10,6 +10,7 @@ MECHA_MIN = 4
 MECHA_MAX = 9
 MECHA_MAXIMA_AGUA = 12
 GOTAS_INICIALES = 3
+PROB_BOT_SIGUIENTE = 0.4
 
 
 def nueva_lista():
@@ -166,3 +167,46 @@ def estado_partida(
     if recogida is not None:
         datos["recogida"] = recogida
     return datos
+
+
+def candidatos_bot(lista, actual):
+    """Jugadores a los que puede pasar un bot, en el orden del círculo.
+
+    Recorre la lista con ``siguiente`` empezando por quien sigue a ``actual``.
+    Solo lee la ListaCircular; no la modifica.
+    """
+    if lista is None or lista.esta_vacia():
+        raise ValueError("No hay una partida activa.")
+    if actual is None:
+        actual = lista.cabeza
+
+    candidatos = []
+    nodo = actual.siguiente
+    while nodo is not actual:
+        candidatos.append(nodo.dato)
+        nodo = nodo.siguiente
+    return candidatos
+
+
+def elegir_destino_bot(lista, actual, azar=random):
+    """El bot elige a quién pasar: el siguiente del círculo o uno al azar."""
+    candidatos = candidatos_bot(lista, actual)
+    if not candidatos:
+        raise ValueError("No hay a quién pasarle la papa.")
+    if azar.random() < PROB_BOT_SIGUIENTE:
+        return candidatos[0]
+    return azar.choice(candidatos)
+
+
+def bot_quiere_agua(mecha, gotas, ya_tomo_agua=False, azar=random):
+    """Devuelve el id de la gota que el bot recoge, o None si no recoge.
+
+    Con mecha 1 el bot prefiere pasar (el que recibe explota). Con mecha 2
+    suele tomar agua para no dejarle la mecha en 1 al siguiente jugador.
+    """
+    if ya_tomo_agua or not gotas or mecha >= MECHA_MAXIMA_AGUA or mecha == 1:
+        return None
+    probabilidad = 0.75 if mecha == 2 else 0.1
+    if azar.random() < probabilidad:
+        return azar.choice(gotas)["id"]
+    return None

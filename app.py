@@ -5,8 +5,10 @@ import os
 from flask import Flask, jsonify, render_template, request, session
 
 from juego import (
+    bot_quiere_agua,
     crear_gotas,
     crear_partida,
+    elegir_destino_bot,
     estado_partida,
     nueva_lista,
     pasar_papa,
@@ -92,6 +94,10 @@ def api_nueva():
     session["nombres"] = lista.recorrer()
     session["actual"] = actual.dato
     session["mecha"] = mecha
+    con_bots = bool(datos.get("bots"))
+    session["bots"] = con_bots
+    session["humano"] = actual.dato if con_bots else None
+    session["bot_agua"] = False
     gotas = crear_gotas()
     session["gotas"] = gotas
 
@@ -124,6 +130,7 @@ def api_pasar():
     session["nombres"] = resultado["lista"].recorrer()
     session["actual"] = actual.dato if actual is not None else None
     session["mecha"] = resultado["mecha"]
+    session["bot_agua"] = False
 
     if resultado["eliminado"] is not None:
         reponer_gota(gotas)
@@ -139,6 +146,75 @@ def api_pasar():
             gotas=gotas,
         )
     )
+
+
+@app.post("/api/bot")
+def api_bot():
+    """Juega un movimiento del bot que tiene la papa (agua o pase)."""
+    lista = _lista_desde_sesion()
+    if lista is None:
+        return jsonify({"error": "No hay una partida activa. Pulsa Nueva partida."}), 400
+    if not session.get("bots"):
+        return jsonify({"error": "Esta partida no tiene bots."}), 400
+    if len(lista.recorrer()) < 2:
+        return jsonify({"error": "La partida ya terminó."}), 400
+
+    actual = _nodo_actual(lista, session.get("actual"))
+    if actual is None:
+        return jsonify({"error": "No hay un jugador con la papa."}), 400
+    bot = actual.dato
+    if bot == session.get("humano"):
+        return jsonify({"error": "Es el turno del jugador humano."}), 400
+
+    mecha = session.get("mecha", 0)
+    gotas = _gotas_sesion()
+
+    gota_id = bot_quiere_agua(mecha, gotas, bool(session.get("bot_agua")))
+    if gota_id is not None:
+        try:
+            resultado = recoger_gota(gotas, mecha, gota_id)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
+
+        session["mecha"] = resultado["mecha"]
+        session["gotas"] = resultado["gotas"]
+        session["bot_agua"] = True
+        datos = estado_partida(
+            lista,
+            actual,
+            resultado["mecha"],
+            gotas=resultado["gotas"],
+            recogida=resultado["gota"],
+        )
+        datos["bot"] = {"jugador": bot, "accion": "agua"}
+        return jsonify(datos)
+
+    try:
+        destino = elegir_destino_bot(lista, actual)
+        resultado = pasar_papa(lista, actual, mecha, destino)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+
+    nuevo_actual = resultado["actual"]
+    session["nombres"] = resultado["lista"].recorrer()
+    session["actual"] = nuevo_actual.dato if nuevo_actual is not None else None
+    session["mecha"] = resultado["mecha"]
+    session["bot_agua"] = False
+
+    if resultado["eliminado"] is not None:
+        reponer_gota(gotas)
+    session["gotas"] = gotas
+
+    datos = estado_partida(
+        resultado["lista"],
+        nuevo_actual,
+        resultado["mecha"],
+        eliminado=resultado["eliminado"],
+        ganador=resultado["ganador"],
+        gotas=gotas,
+    )
+    datos["bot"] = {"jugador": bot, "accion": "pasar", "destino": destino}
+    return jsonify(datos)
 
 
 @app.post("/api/recoger")

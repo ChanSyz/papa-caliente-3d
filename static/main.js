@@ -24,7 +24,7 @@ import {
   explosionEn,
   girarCamara,
   acercarCamara,
-} from './escena.js?v=8';
+} from './escena.js?v=9';
 
 const numInput = document.querySelector('#numJugadores');
 const numVal = document.querySelector('#numVal');
@@ -40,6 +40,7 @@ const circuloEl = document.querySelector('#circulo');
 const estadoEl = document.querySelector('#estado');
 const resultadoEl = document.querySelector('#resultado');
 const flashEl = document.querySelector('#flash');
+const modoBots = document.querySelector('#modoBots');
 
 const raycaster = new THREE.Raycaster();
 const puntero = new THREE.Vector2();
@@ -51,11 +52,34 @@ let jugando = false;
 let fin = false;
 let ocupado = false;
 let pointerDown = null;
+let botsActivos = false;
+let humano = null;
+let corriendoBots = false;
+let partidaId = 0;
+const NOMBRE_HUMANO = 'Jugador 1';
 
 const dormir = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function nombresPorDefecto(cantidad) {
-  return Array.from({ length: cantidad }, (_, i) => `Jugador ${i + 1}`);
+  const conBots = modoBots.checked;
+  return Array.from({ length: cantidad }, (_, i) => {
+    if (!conBots) return `Jugador ${i + 1}`;
+    return i === 0 ? NOMBRE_HUMANO : `Bot ${i + 1}`;
+  });
+}
+
+function esTurnoBot() {
+  return botsActivos && actual !== humano;
+}
+
+function textoTurno(nombre) {
+  if (!botsActivos) {
+    return `${nombre} tiene la papa. Elige a quién pasarla o recoge una gota 💧.`;
+  }
+  if (nombre === humano) {
+    return '¡Te toca! Tienes la papa: elige a quién pasarla o recoge una gota 💧.';
+  }
+  return `${nombre} tiene la papa y está pensando…`;
 }
 
 function pedir(url, cuerpo) {
@@ -123,7 +147,7 @@ function destello() {
 
 function bloquearDestinos(bloqueado) {
   destinosEl.querySelectorAll('button').forEach((boton) => {
-    boton.disabled = bloqueado;
+    boton.disabled = bloqueado || esTurnoBot();
   });
 }
 
@@ -146,7 +170,7 @@ function renderDestinos() {
     const boton = document.createElement('button');
     boton.type = 'button';
     boton.className = 'destino-btn';
-    boton.disabled = ocupado || fin;
+    boton.disabled = ocupado || fin || esTurnoBot();
 
     const punto = document.createElement('span');
     punto.className = 'dot';
@@ -171,6 +195,9 @@ function marcarActual(nombre) {
 function vistaPrevia(actualizarEstado = true) {
   if (ocupado) return;
 
+  partidaId += 1;
+  botsActivos = false;
+  humano = null;
   jugando = false;
   fin = false;
   actual = null;
@@ -180,7 +207,7 @@ function vistaPrevia(actualizarEstado = true) {
   infoJuego.hidden = true;
   resultadoEl.hidden = true;
   resultadoEl.textContent = '';
-  numInput.disabled = false;
+  numInput.disabled = modoBots.disabled = false;
   btnNueva.disabled = false;
   btnNueva.textContent = 'Empezar partida';
 
@@ -195,14 +222,18 @@ async function nuevaPartida() {
 
   ocupado = true;
   btnNueva.disabled = true;
-  numInput.disabled = true;
+  numInput.disabled = modoBots.disabled = true;
   estadoEl.textContent = 'Barajando la lista circular…';
 
   try {
     const datos = await pedir('/api/nueva', {
       jugadores: nombresPorDefecto(Number(numInput.value)),
+      bots: modoBots.checked,
     });
 
+    partidaId += 1;
+    botsActivos = modoBots.checked;
+    humano = botsActivos ? datos.actual : null;
     crearJugadores(datos.jugadores);
     limpiarGotas();
     sincronizarGotas(datos.gotas);
@@ -217,14 +248,16 @@ async function nuevaPartida() {
     marcarActual(datos.actual);
     mostrarMecha(datos.mecha);
     colocarPapaEn(grupos.get(datos.actual));
-    estadoEl.textContent = `${datos.actual} tiene la papa. Elige a quién pasarla o recoge una gota 💧.`;
+    estadoEl.textContent = botsActivos
+      ? `Eres ${humano}; los demás son bots 🤖. ${textoTurno(datos.actual)}`
+      : textoTurno(datos.actual);
   } catch (error) {
     estadoEl.textContent = `Error: ${error.message}`;
     vistaPrevia(false);
   } finally {
     ocupado = false;
     btnNueva.disabled = false;
-    numInput.disabled = jugando && !fin;
+    numInput.disabled = modoBots.disabled = jugando && !fin;
     bloquearDestinos(fin);
   }
 }
@@ -250,17 +283,20 @@ async function eliminarDelCirculo(nombre) {
   }
 }
 
-async function pasarPapa(destino) {
+async function pasarPapa(destino, resultadoBot = null) {
   if (!jugando || fin || ocupado) return;
+  if (!resultadoBot && esTurnoBot()) return;
   if (destino === actual || !grupos.has(destino)) return;
 
   ocupado = true;
   bloquearDestinos(true);
-  estadoEl.textContent = `Pasando la papa a ${destino}…`;
+  estadoEl.textContent = resultadoBot
+    ? `${actual} le pasa la papa a ${destino}…`
+    : `Pasando la papa a ${destino}…`;
 
   try {
     await moverPapaA(grupos.get(destino), 340);
-    const datos = await pedir('/api/pasar', { destino });
+    const datos = resultadoBot ?? await pedir('/api/pasar', { destino });
 
     actualizarCirculo(datos.jugadores);
     mostrarMecha(datos.mecha);
@@ -284,11 +320,11 @@ async function pasarPapa(destino) {
       resultadoEl.textContent = `🏆 Gana ${datos.ganador}`;
       resultadoEl.hidden = false;
       btnNueva.textContent = 'Jugar otra vez';
-      numInput.disabled = false;
+      numInput.disabled = modoBots.disabled = false;
     } else {
       marcarActual(datos.actual);
       if (!datos.eliminado) {
-        estadoEl.textContent = `${datos.actual} tiene la papa. Elige a quién pasarla o recoge una gota 💧.`;
+        estadoEl.textContent = textoTurno(datos.actual);
       } else {
         colocarPapaEn(grupos.get(datos.actual));
         estadoEl.textContent =
@@ -304,11 +340,63 @@ async function pasarPapa(destino) {
     ocupado = false;
     btnNueva.disabled = false;
     bloquearDestinos(fin);
+    if (botsActivos && jugando && !fin) setTimeout(turnosDeBots, 60);
+  }
+}
+
+function aplicarAgua(datos) {
+  recogerGotaAnimada(datos.recogida.id);
+  sincronizarGotas(datos.gotas);
+  actualizarGotas(datos.gotas);
+  mostrarMecha(datos.mecha);
+
+  mechaCard.classList.remove('refresco');
+  void mechaCard.offsetWidth;
+  mechaCard.classList.add('refresco');
+}
+
+async function jugarTurnoBot() {
+  ocupado = true;
+  bloquearDestinos(true);
+  let datos;
+  try {
+    datos = await pedir('/api/bot', {});
+  } catch (error) {
+    ocupado = false;
+    estadoEl.textContent = `Error: ${error.message}`;
+    return false;
+  }
+
+  if (datos.bot.accion === 'agua') {
+    aplicarAgua(datos);
+    estadoEl.textContent = `💧 ${datos.bot.jugador} recoge agua: la mecha sube a ${datos.mecha} pases.`;
+    await dormir(700);
+    ocupado = false;
+  } else {
+    ocupado = false;
+    await pasarPapa(datos.bot.destino, datos);
+  }
+  return true;
+}
+
+async function turnosDeBots() {
+  if (!botsActivos || corriendoBots) return;
+  corriendoBots = true;
+  const id = partidaId;
+  try {
+    while (id === partidaId && jugando && !fin && actual && esTurnoBot()) {
+      await dormir(850);
+      if (id !== partidaId || !jugando || fin) break;
+      if (ocupado) continue;
+      if (!(await jugarTurnoBot())) break;
+    }
+  } finally {
+    corriendoBots = false;
   }
 }
 
 async function recogerGota(gotaId) {
-  if (!jugando || fin || ocupado || !gotaId) return;
+  if (!jugando || fin || ocupado || !gotaId || esTurnoBot()) return;
 
   ocupado = true;
   bloquearDestinos(true);
@@ -317,14 +405,7 @@ async function recogerGota(gotaId) {
   try {
     const datos = await pedir('/api/recoger', { gota_id: gotaId });
 
-    recogerGotaAnimada(datos.recogida.id);
-    sincronizarGotas(datos.gotas);
-    actualizarGotas(datos.gotas);
-    mostrarMecha(datos.mecha);
-
-    mechaCard.classList.remove('refresco');
-    void mechaCard.offsetWidth;
-    mechaCard.classList.add('refresco');
+    aplicarAgua(datos);
 
     estadoEl.textContent = `💧 ¡Agua recogida! La mecha sube a ${datos.mecha} pases.`;
   } catch (error) {
@@ -439,6 +520,7 @@ numInput.addEventListener('input', () => {
   vistaPrevia();
 });
 
+modoBots.addEventListener('change', () => vistaPrevia());
 btnNueva.addEventListener('click', nuevaPartida);
 configurarTeclado();
 

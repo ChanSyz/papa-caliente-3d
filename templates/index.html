@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080d18">
   <title>Papa Caliente 3D · Lista Circular</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='10') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='6') }}">
 </head>
 <body>
   <canvas id="scene" aria-label="Escena 3D del juego"></canvas>
@@ -20,16 +20,17 @@
     </div>
   </header>
 
-  <button id="btnPanel" class="panel-toggle" type="button"
-          aria-controls="panelJuego" aria-expanded="true">✕ Ocultar</button>
-
-  <aside class="panel" id="panelJuego" aria-label="Controles del juego">
+  <aside class="panel" aria-label="Controles del juego">
     <div class="setup">
       <label class="control" for="numJugadores">
         <span>Jugadores</span>
         <output id="numVal">6</output>
       </label>
       <input id="numJugadores" type="range" min="2" max="10" value="6" step="1">
+      <label class="check" for="modoBots">
+        <input id="modoBots" type="checkbox" checked>
+        <span>Jugar contra bots 🤖</span>
+      </label>
       <button id="btnNueva" type="button">Empezar partida</button>
     </div>
 
@@ -94,6 +95,6 @@
       }
     }
   </script>
-  <script type="module" src="{{ url_for('static', filename='main.js', v='10') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='main.js', v='9') }}"></script>
 </body>
 </html>
