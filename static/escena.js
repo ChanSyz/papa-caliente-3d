@@ -43,6 +43,26 @@ controls.dampingFactor = 0.085;
 controls.enablePan = false;
 controls.minDistance = 5.4;
 controls.maxDistance = 16;
+
+const distanciaBase = camera.position.distanceTo(controls.target);
+const direccionBase = camera.position.clone().sub(controls.target).normalize();
+
+export function encuadrar() {
+  const aspecto = window.innerWidth / window.innerHeight;
+  if (aspecto < 1) {
+    const factor = THREE.MathUtils.clamp(1.12 / aspecto, 1, 2.2);
+    controls.maxDistance = 34;
+    camera.position.copy(controls.target)
+      .add(direccionBase.clone().multiplyScalar(distanciaBase * factor));
+  } else {
+    controls.maxDistance = 16;
+    camera.position.copy(controls.target)
+      .add(direccionBase.clone().multiplyScalar(distanciaBase));
+  }
+  controls.update();
+}
+
+encuadrar();
 controls.minPolarAngle = 0.18;
 controls.maxPolarAngle = Math.PI / 2 - 0.04;
 controls.rotateSpeed = 0.62;
@@ -808,6 +828,7 @@ export function resize() {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
   labelRenderer.setSize(window.innerWidth, window.innerHeight);
+  encuadrar();
 }
 
 window.addEventListener('resize', resize);
