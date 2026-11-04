@@ -1,4 +1,4 @@
-"""Lógica de la papa caliente usando la ListaCircular del profesor."""
+"""Lógica de la papa caliente usando la ListaCircular ."""
 
 import math
 import random
