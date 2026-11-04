@@ -4,6 +4,7 @@ import {
   camera,
   renderer,
   labelRenderer,
+  composer,
   controls,
   crearJugador,
   posicionEnCirculo,
@@ -23,7 +24,7 @@ import {
   explosionEn,
   girarCamara,
   acercarCamara,
-} from './escena.js?v=10';
+} from './escena.js?v=8';
 
 const numInput = document.querySelector('#numJugadores');
 const numVal = document.querySelector('#numVal');
@@ -39,8 +40,6 @@ const circuloEl = document.querySelector('#circulo');
 const estadoEl = document.querySelector('#estado');
 const resultadoEl = document.querySelector('#resultado');
 const flashEl = document.querySelector('#flash');
-const btnPanel = document.querySelector('#btnPanel');
-const panelEl = document.querySelector('#panelJuego');
 
 const raycaster = new THREE.Raycaster();
 const puntero = new THREE.Vector2();
@@ -120,7 +119,6 @@ function destello() {
   flashEl.classList.remove('boom');
   void flashEl.offsetWidth;
   flashEl.classList.add('boom');
-  if (navigator.vibrate) navigator.vibrate([20, 40, 90]);
 }
 
 function bloquearDestinos(bloqueado) {
@@ -220,11 +218,6 @@ async function nuevaPartida() {
     mostrarMecha(datos.mecha);
     colocarPapaEn(grupos.get(datos.actual));
     estadoEl.textContent = `${datos.actual} tiene la papa. Elige a quién pasarla o recoge una gota 💧.`;
-    if (window.matchMedia('(max-width: 760px)').matches) {
-      panelEl.classList.add('oculto');
-      btnPanel.setAttribute('aria-expanded', 'false');
-      btnPanel.textContent = '☰ Panel';
-    }
   } catch (error) {
     estadoEl.textContent = `Error: ${error.message}`;
     vistaPrevia(false);
@@ -447,12 +440,6 @@ numInput.addEventListener('input', () => {
 });
 
 btnNueva.addEventListener('click', nuevaPartida);
-
-btnPanel.addEventListener('click', () => {
-  const oculto = panelEl.classList.toggle('oculto');
-  btnPanel.setAttribute('aria-expanded', String(!oculto));
-  btnPanel.textContent = oculto ? '☰ Panel' : '✕ Ocultar';
-});
 configurarTeclado();
 
 let anterior = performance.now();
@@ -463,7 +450,7 @@ function animar(ahora) {
 
   updateEnvironment(dt);
   controls.update();
-  renderer.render(scene, camera);
+  composer.render();
   labelRenderer.render(scene, camera);
 
   requestAnimationFrame(animar);
